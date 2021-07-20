@@ -1,10 +1,4 @@
-# locates the nearest empty sudoku space
-def find_empty_space(puzzle):
-    for i in range(0, 9):
-        for j in range(0, 9):
-            if puzzle[i][j] == 0:
-                return [i, j]
-    return False
+import random
 
 def check_valid_num(puzzle, num, coord):
     # determine starting points for the sudoku square
@@ -72,6 +66,14 @@ def check_sudoku(puzzle_object):
         'multiple_solutions': False
     }
 
+    # locates the nearest empty sudoku space
+    def find_empty_space(puzzle):
+        for i in range(0, 9):
+            for j in range(0, 9):
+                if puzzle[i][j] == 0:
+                    return [i, j]
+        return False
+
     # solves a sudoku and returns a boolean for its solvability
     def solve_sudoku(coord):
         # if the puzzle is filled, mark it as solved
@@ -79,6 +81,7 @@ def check_sudoku(puzzle_object):
             # if the puzzle has already been completed, mark it as having multiple solutions
             if object_copy['solved']:
                 object_copy['multiple_solutions'] = True
+
             print(object_copy['puzzle'])
             object_copy['solved'] = True
 
@@ -88,27 +91,63 @@ def check_sudoku(puzzle_object):
             # if the puzzle is already marked for mult solutions, avoid unecessary computation
             if object_copy['multiple_solutions']:
                 return 
+
             if coord:
                 if check_valid_num(object_copy['puzzle'], num, coord):
                     object_copy['puzzle'][coord[0]][coord[1]] = num
                     solve_sudoku(find_empty_space(object_copy['puzzle']))
             else:
                 return
+
         # before backtracking, reset the puzzle-space to 0
         object_copy['puzzle'][coord[0]][coord[1]] = 0
         return
+
     solve_sudoku(find_empty_space(object_copy['puzzle']))
-    print(object_copy['puzzle'])
+    # print(object_copy['puzzle'])
     return object_copy['solved'] and not object_copy['multiple_solutions']
 
-print(check_sudoku(sudoku_object))
-
-
-
 def generate_puzzle():
-    empty_puzzle = [[0 for i in range(9)] for j in range(9)]
+    # initalizes empty puzzle with a tile counter set to 0
+    empty_puzzle = {
+        'puzzle': [[0 for i in range(9)] for j in range(9)],
+        'current_space': 0
+    }
 
-    # for row in empty_puzzle:
-        # print(row)
+    # recursive function to build upon above puzzle
+    def build_sudoku():
+        space = empty_puzzle['current_space']
+        # the counter being at 81 indicates that the puzzle is full
+        if space == 81:
+            return
+        # creates coordinates of current tile from counter
+        coord = [int((space - (space % 9))/9), space % 9]
 
-generate_puzzle()
+        # shuffled list of nums 1-9
+        num_list = list(range(1, 10))
+        random.shuffle(num_list)
+
+        # tries nums 1-9 in random order at current tile
+        for num in num_list:
+            if empty_puzzle['current_space'] == 81:
+                return
+            if check_valid_num(empty_puzzle['puzzle'], num, coord):
+                empty_puzzle['puzzle'][coord[0]][coord[1]] = num
+                empty_puzzle['current_space'] += 1
+                build_sudoku()
+
+        # when the puzzle is full there is no need for resets as the function unwinds
+        if empty_puzzle['current_space'] == 81:
+            return
+
+        # sets current tile back to 0 and rewinds counter before backtracking
+        empty_puzzle['puzzle'][coord[0]][coord[1]] = 0
+        empty_puzzle['current_space'] -= 1
+        return
+    
+    build_sudoku()
+    return empty_puzzle['puzzle']
+
+new_sudoku = generate_puzzle()
+for row in new_sudoku:
+    print(row)
