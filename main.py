@@ -20,46 +20,6 @@ def check_valid_num(puzzle, num, coord):
 
     return True
 
-# example solvable sudoku
-puzzle1 = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-          [6, 0, 0, 1, 9, 5, 0, 0, 0],
-          [0, 9, 8, 0, 0, 0, 0, 6, 0],
-          [8, 0, 0, 0, 6, 0, 0, 0, 3],
-          [4, 0, 0, 8, 0, 3, 0, 0, 1],
-          [7, 0, 0, 0, 2, 0, 0, 0, 6],
-          [0, 6, 0, 0, 0, 0, 2, 8, 0],
-          [0, 0, 0, 4, 1, 9, 0, 0, 5],
-          [0, 0, 0, 0, 8, 0, 0, 7, 9]]
-
-# example unsolvable sudoku
-puzzle2 = [[5, 3, 2, 0, 7, 0, 0, 0, 0],
-           [6, 0, 0, 1, 9, 5, 4, 0, 0],
-           [0, 9, 8, 0, 0, 0, 1, 6, 0],
-           [8, 0, 0, 0, 6, 0, 0, 0, 3],
-           [4, 0, 0, 8, 0, 3, 0, 0, 1],
-           [7, 0, 3, 0, 2, 0, 0, 0, 6],
-           [0, 6, 0, 0, 0, 0, 2, 8, 0],
-           [0, 0, 0, 4, 1, 9, 6, 0, 5],
-           [0, 0, 0, 0, 8, 0, 0, 7, 9]]
-
-# example sudoku with more than one solution
-puzzle3 = [[0, 0, 0, 0, 7, 0, 0, 0, 0],
-           [6, 0, 0, 0, 9, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 6, 0],
-           [8, 0, 0, 0, 6, 0, 0, 0, 3],
-           [0, 0, 0, 8, 0, 3, 0, 0, 1],
-           [0, 0, 3, 0, 2, 0, 0, 0, 6],
-           [0, 0, 0, 0, 0, 0, 0, 8, 0],
-           [0, 0, 0, 0, 1, 0, 0, 0, 0],
-           [0, 0, 0, 0, 8, 0, 0, 0, 0]]
-
-# example object to pass into check_sudoku func
-sudoku_object = {
-    'puzzle': puzzle3,
-    'solved': False,
-    'multiple_solutions': False
-}
-
 # checks if a sudoku is solvable
 def check_sudoku(puzzle_object):
     # copy of object to prevent mutations
@@ -146,11 +106,9 @@ def generate_puzzle():
     build_sudoku()
     return empty_puzzle['puzzle']
 
+# function to create a sudoku with missing tiles that is solvable
 def generate_sudoku():
     new_puzzle = generate_puzzle()
-    for row in new_puzzle:
-        print(row)
-    print('\n')
 
     puzzle_obj = {
         'solved_puzzle': new_puzzle,
@@ -159,6 +117,7 @@ def generate_sudoku():
         'multiple_solutions': False
     }
 
+    # Makes sure there are at least twenty filled tiles
     counter = 0
     while counter < 21:
         row = random.randint(0, 8)
@@ -170,6 +129,7 @@ def generate_sudoku():
         puzzle_obj['puzzle'][row][col] = puzzle_obj['solved_puzzle'][row][col]
         counter += 1
 
+    # Fills tiles until the puzzle is solvable
     while not check_sudoku(puzzle_obj):
         row = random.randint(0, 8)
         col = random.randint(0, 8)
