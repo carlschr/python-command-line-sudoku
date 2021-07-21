@@ -1,4 +1,5 @@
 import random
+import copy
 
 def check_valid_num(puzzle, num, coord):
     # determine starting points for the sudoku square
@@ -55,16 +56,14 @@ puzzle3 = [[0, 0, 0, 0, 7, 0, 0, 0, 0],
 # example object to pass into check_sudoku func
 sudoku_object = {
     'puzzle': puzzle3,
+    'solved': False,
+    'multiple_solutions': False
 }
 
 # checks if a sudoku is solvable
 def check_sudoku(puzzle_object):
     # copy of object to prevent mutations
-    object_copy = {
-        **puzzle_object,
-        'solved': False,
-        'multiple_solutions': False
-    }
+    object_copy = copy.deepcopy(puzzle_object)
 
     # locates the nearest empty sudoku space
     def find_empty_space(puzzle):
@@ -82,7 +81,6 @@ def check_sudoku(puzzle_object):
             if object_copy['solved']:
                 object_copy['multiple_solutions'] = True
 
-            print(object_copy['puzzle'])
             object_copy['solved'] = True
 
         # for numbers 1 through 9
@@ -148,6 +146,47 @@ def generate_puzzle():
     build_sudoku()
     return empty_puzzle['puzzle']
 
-new_sudoku = generate_puzzle()
-for row in new_sudoku:
+def generate_sudoku():
+    new_puzzle = generate_puzzle()
+    for row in new_puzzle:
+        print(row)
+    print('\n')
+
+    puzzle_obj = {
+        'solved_puzzle': new_puzzle,
+        'puzzle': [[0 for i in range(9)] for j in range(9)],
+        'solved': False,
+        'multiple_solutions': False
+    }
+
+    counter = 0
+    while counter < 21:
+        row = random.randint(0, 8)
+        col = random.randint(0, 8)
+
+        if puzzle_obj['puzzle'][row][col] != 0:
+            continue
+
+        puzzle_obj['puzzle'][row][col] = puzzle_obj['solved_puzzle'][row][col]
+        counter += 1
+
+    while not check_sudoku(puzzle_obj):
+        row = random.randint(0, 8)
+        col = random.randint(0, 8)
+
+        if puzzle_obj['puzzle'][row][col] != 0:
+            continue
+
+        puzzle_obj['puzzle'][row][col] = puzzle_obj['solved_puzzle'][row][col]
+
+    return puzzle_obj
+
+  
+
+
+new_sudoku = generate_sudoku()
+for row in new_sudoku['solved_puzzle']:
+    print(row)
+print('\n')
+for row in new_sudoku['puzzle']:
     print(row)
