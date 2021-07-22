@@ -10,7 +10,6 @@ def valid_integer(string):
     except ValueError:
         return False
 
-
 # locates the nearest empty sudoku space
 def find_empty_space(puzzle):
     for i in range(0, 9):
@@ -19,6 +18,7 @@ def find_empty_space(puzzle):
                 return [i, j]
     return False
 
+# function to check sudoku rules for an input
 def check_valid_num(puzzle, num, coord):
     # determine starting points for the sudoku square
     square_y = coord[0] - (coord[0] % 3)
@@ -75,6 +75,7 @@ def check_sudoku(puzzle_object):
     # print(object_copy['puzzle'])
     return object_copy['solved'] and not object_copy['multiple_solutions']
 
+# function to create a filled puzzle
 def generate_puzzle():
     # initalizes empty puzzle with a tile counter set to 0
     empty_puzzle = {
