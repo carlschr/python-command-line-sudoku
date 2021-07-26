@@ -221,6 +221,7 @@ def play():
 
                 response = switch(keep_playing.upper())
                 if response:
+                    print('Generating puzzle...')
                     play()
                 else:
                     playing = False
@@ -234,4 +235,5 @@ def play():
 
 # program start
 if __name__ == '__main__':
+    print('Generating puzzle...')
     play()
