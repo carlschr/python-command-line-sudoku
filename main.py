@@ -170,7 +170,7 @@ def print_sudoku(sudoku):
             else:
                 row_string += str(num) + '|'
 
-        row_strings.append(row_string)
+        row_strings.append(row_string.replace('0', ' '))
     
     # top line
     print(' _________________')
@@ -208,6 +208,7 @@ def play():
             # if the puzzle is filled ask if they want to keep playing
             if not find_empty_space(new_sudoku['puzzle']):
                 print('Congrats, you finished the puzzle!')
+                print_sudoku(new_sudoku['puzzle'])
                 keep_playing = input('Keep playing? Y/N: ')
 
                 # switch statement function
@@ -232,4 +233,5 @@ def play():
     sys.exit()
 
 # program start
-play()
+if __name__ == '__main__':
+    play()
