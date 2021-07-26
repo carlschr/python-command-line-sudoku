@@ -5,7 +5,7 @@ This program is a command line python program that generates a sudoku puzzle and
 
 ## How to Use
 1. Python3 should be downloaded to use this program. To check if you have Python3 downloaded use this code to check for a version: `python3 --version`.
-2. Once Python3 is downloaded, navigate to the project folder and type: `python main`.
+2. Once Python3 is downloaded, navigate to the project folder and type: `python main.py`.
 3. When prompted, each input must be formatted in this way: r"row number"c"column number" "number that you want to input" (e.g. "row 2, column 3 = 6" will be `r2c3 6`)
 4. Enjoy!
 
