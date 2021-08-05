@@ -1,5 +1,5 @@
 class Node:
-    def __init__(self, value):
+    def __init__(self, value=None):
         self.up = None
         self.down = None
         self.left = None
@@ -52,7 +52,8 @@ class CircularDoublyLinkedList:
     def set_tail(self, node):
         self.tail = node
 
-    def add_node(self, node):
+    def add_node(self, value):
+        node = Node(value)
         if self.size == 0:
             self.set_central_node(node)
             self.set_tail(node)
@@ -79,6 +80,33 @@ class CircularDoublyLinkedList:
         self.size += 1
         return node
     
+    def __repr__(self) -> str:
+        string = ''
+        central_node = self.get_central_node()
+
+        if central_node:
+            current_node = central_node.get_down() if self.direction else central_node.get_right()
+            if current_node:
+                while current_node is not central_node:
+                    string += str(current_node.value)
+                    string += '\n'
+                    current_node = current_node.get_down() if self.direction else current_node.get_right()
+
+        return string
+
+h = CircularDoublyLinkedList(0)
+h.add_node('h')
+for i in range(81 * 4):
+    h.add_node(i)
+
+v = CircularDoublyLinkedList(1)
+v.add_node('v')
+for j in range(81 * 9):
+    v.add_node(j)
+
+print(v)
+
+
 class Sudoku:
     def __init__(self, grid):
         self.grid = [[0 for j in range(9)] for i in range(9)]
