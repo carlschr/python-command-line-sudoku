@@ -1,10 +1,83 @@
 class Node:
-    def __init__(self):
+    def __init__(self, value):
         self.up = None
         self.down = None
         self.left = None
         self.right = None
         self.coord = [None, None]
+        self.value = value
+    
+    def set_right(self, node):
+        self.right = node
+    def set_left(self, node):
+        self.left = node
+    def set_up(self, node):
+        self.up = node
+    def set_down(self, node):
+        self.down = node
+
+    def get_right(self):
+        return self.right
+    def get_left(self):
+        return self.left
+    def get_up(self):
+        return self.up
+    def get_down(self):
+        return self.down
+    
+    def set_row(self, row):
+        self.coord[0] = row
+    def set_col(self, col):
+        self.coord[1] = col
+
+    def get_row(self):
+        return self.coord[0]
+    def get_col(self):
+        return self.coord[1]
+
+class CircularDoublyLinkedList:
+    def __init__(self, direction):
+        self.central_node = None
+        self.tail = None
+        self.size = 0
+        self.direction = direction
+    
+    def get_central_node(self):
+        return self.central_node
+    def get_tail(self):
+        return self.tail
+
+    def set_central_node(self, node):
+        self.central_node = node
+    def set_tail(self, node):
+        self.tail = node
+
+    def add_node(self, node):
+        if self.size == 0:
+            self.set_central_node(node)
+            self.set_tail(node)
+            self.size = 1
+            return node
+
+        central_node = self.get_central_node()
+        tail = self.get_tail()
+
+        if self.direction:
+            tail.set_down(node)
+            node.set_down(central_node)
+            node.set_up(tail)
+            central_node.set_up(node)
+            node.set_col(central_node.get_col())
+        else:
+            tail.set_right(node)
+            node.set_right(central_node)
+            node.set_left(tail)
+            central_node.set_left(node)
+            node.set_row(central_node.get_row())
+
+        self.set_tail(node)
+        self.size += 1
+        return node
     
 class Sudoku:
     def __init__(self, grid):
