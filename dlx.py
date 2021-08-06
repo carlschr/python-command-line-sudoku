@@ -44,25 +44,25 @@ class TwoDimensionalLinkedList:
     
 
 def create_rows_cols(head_node):
-    # creates columns
+    # creates columns 1 through 81 * 4
     current_node = head_node
-    for i in range(81*4):
+    for i in range(1, 81*4 + 1):
         temp = Node(i)
         current_node.set_right(temp)
         temp.set_left(current_node)
         current_node = temp
-        if i == 323:
+        if i == 324:
             temp.set_right(head_node)
             head_node.set_left(temp)
     
-    # creates rows
+    # creates rows 1 through 81 * 9
     current_node = head_node
-    for i in range(81*9):
+    for i in range(1, 81*9 + 1):
         temp = Node(i)
         current_node.set_down(temp)
         temp.set_up(current_node)
         current_node = temp
-        if i == 728:
+        if i == 729:
             temp.set_down(head_node)
             head_node.set_up(temp)
 
