@@ -119,28 +119,30 @@ class Cover:
 
     def connect_one_above(self, i, j):
         n = i - 1
-        while n > 0:
+        while n >= 0:
             if self.matrix[n][j].value:
                 current = self.matrix[i][j]
                 found = self.matrix[n][j]
                 current.up = found
                 found.down = current
                 return found.value
-            n += 1
+            n -= 1
         return 0
 
     def connect_one_left(self, i, j):
         n = j - 1
-        while n > 0:
+        while n >= 0:
             if self.matrix[i][n].value:
                 current = self.matrix[i][j]
                 found = self.matrix[i][n]
                 current.left = found
                 found.right = current
                 return found.value
-            n += 1
+            n -= 1
         return 0
 
 cover = Cover()
 
-my_arr = cover.matrix
+print(cover.head.coord)
+print(cover.head.right.coord)
+print(cover.head.down.coord)
