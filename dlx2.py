@@ -117,7 +117,7 @@ class Cover:
 
 
 
-
+#Tomfoolery below this line... beware!
 #-----------------------------------------------------------------
 
 
@@ -159,4 +159,4 @@ while current_row != 729:
 
     current_row += 1
 
-print(col_list.head_col.left.head)
+# print(col_list.head_col.left.head)
