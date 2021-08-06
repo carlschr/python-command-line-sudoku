@@ -1,5 +1,3 @@
-
-
 class Node:
     def __init__(self, value, row, col):
         self.value = value
@@ -14,21 +12,25 @@ class Node:
         node.up = self.up
         node.down = self
         self.up.down = node
+        self.up = node
 
     def add_below(self, node):
         node.down = self.down
         node.up = self
         self.down.up = node
+        self.down = node
 
     def add_right(self, node):
         node.right = self.right
         node.left = self
         self.right.left = node
+        self.right = node
 
     def add_left(self, node):
         node.left = self.left
         node.right = self
         self.left.right = node
+        self.left = node
 
     def __repr__(self) -> str:
         return f'[{self.row}, {self.col}]'
@@ -46,6 +48,7 @@ class Column:
         node.down = self.tail.down
         self.tail.down = node
         self.tail = node
+        self.head.up = node
         self.size += 1
 
     def __repr__(self):
@@ -67,6 +70,7 @@ class ColumnList:
         col.left = self.tail_col
         self.tail_col.right = col
         self.tail_col = col
+        self.head_col.left = col
         self.size += 1
 
     def __repr__(self):
@@ -79,19 +83,6 @@ class ColumnList:
             current_col = current_col.left
         
         return string
-
-# head_col = Column(Node('h', 0, 0))
-# for i in range(1, 10):
-#     head_col.add(Node(i, i, 0))
-
-# col_list = ColumnList(head_col)
-# for i in range(1, 10):
-#     new_col = Column(Node(i, 0, i))
-#     for j in range(1, 10):
-#         new_col.add(Node(0, j, i))
-#     col_list.add(new_col)
-
-# print(col_list)
 
 class Cover:
     def __init__(self):
@@ -119,18 +110,53 @@ class Cover:
             box_i = ((box_number * 9) + (i % 9)) + 81 * 3
             row[box_i] = Node(1, i, box_i)
 
+
+
+
+
+
+
+
+
+#-----------------------------------------------------------------
+
+
+
+
+
 cover = Cover()
 
-head_col = Column(Node('h', 0, 0))
+head_col = Column(Node('h', -1, -1))
 for i in range(81 * 9):
-    head_col.add(Node(i, i, 0))
+    head_col.add(Node(i, i, -1))
 
 col_list = ColumnList(head_col)
 for i in range(81 * 4):
-    new_col = Column(Node(i, 0, i))
+    new_col = Column(Node(i, -1, i))
     for j, row in enumerate(cover.matrix):
         if type(row[i]) is Node:
             new_col.add(row[i])
     col_list.add(new_col)
 
-print(col_list)
+parallel_nodes = []
+current_col = col_list.head_col
+for i in range(col_list.size):
+    parallel_nodes.append(current_col.head)
+    current_col = current_col.right
+
+current_row = -1
+def filter_function(i, el):
+    if el.row == current_row:
+        parallel_nodes[i] = parallel_nodes[i].down
+        return True
+
+while current_row != 729:
+    row_nodes = [node for i, node in enumerate(parallel_nodes) if filter_function(i, node)]
+
+    for i, node in enumerate(row_nodes):
+        if i != len(row_nodes) - 1:
+            node.add_right(row_nodes[i + 1])
+
+    current_row += 1
+
+print(col_list.head_col.left.head)
