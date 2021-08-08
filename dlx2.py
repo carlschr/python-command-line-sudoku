@@ -123,6 +123,7 @@ class Cover:
             row[col_i] = Node(1, i, col_i)
           
             # box constraint gets placed in 9 by 9 diagonals that are offset by 9 times the box number (0 through 8)
+            # the box constraint grid is offset by 243
             box_i = ((box_number * 9) + (i % 9)) + 81 * 3
             row[box_i] = Node(1, i, box_i)
 
