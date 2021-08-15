@@ -1,6 +1,14 @@
+# global sudoku variables
+DIGITS = 9
+ROW_SIZE = DIGITS
+COL_SIZE = DIGITS
+BOX_ROW_SIZE = int(ROW_SIZE ** .5)
+BOX_COL_SIZE = int(COL_SIZE ** .5)
+CELL_COUNT = ROW_SIZE * COL_SIZE
+CONSTRAINTS = 4
+
 class Node:
-    def __init__(self, value, row, col):
-        self.value = value
+    def __init__(self, row, col):
         self.row = row
         self.col = col
         self.up = self
@@ -93,56 +101,73 @@ class ColumnList:
 # Columns 163-243 ensure that a digit may only be guessed once per sudoku column
 # Columns 244-324 ensure that a digit may only be guessed once per box
 class Cover:
-    def __init__(self):
+    def __init__(self, grid=[[0 for j in range(ROW_SIZE)] for i in range(COL_SIZE)]):
         # initializes empty matrix
-        self.matrix = [[0 for j in range(81 * 4)] for i in range(9 * 81)]
+        self.matrix = [[0 for j in range(CELL_COUNT * CONSTRAINTS)] for i in range(CELL_COUNT * DIGITS)]
         # loops through rows to assign constraints
-        for i, row in enumerate(self.matrix):
+        for index, row in enumerate(self.matrix):
+            i = index
             # cells change every 9 rows
-            cell_number = int((i - (i % 9))/9)
+            cell_number = int(i//DIGITS)
             # sudoku rows change every 81 rows
-            row_number = int((i - (i % 81))/81)
+            row_number = int(i//(DIGITS * ROW_SIZE))
             # sudoku columns change for every cell and reset every 9 cells
-            col_number = int(cell_number % 9)
+            col_number = cell_number % COL_SIZE
             # sudoku boxes are calculated by taking the lower row of the box (0,3, or 6) plus the column grouping (1,2, or 3)
             # result is one of nine boxes (0 through 8)
-            box_number = int((row_number - (row_number % 3)) + ((col_number - (col_number % 3))/3))
+            box_number = int(row_number - (row_number % BOX_COL_SIZE) + col_number//BOX_ROW_SIZE)
+
+            # if the sudoku cell is given, the 9 rows for the cell will all be the same
+            # this ensures that the given cells will be part of the solution
+            if grid[row_number][col_number] != 0:
+                i = (cell_number * DIGITS) + grid[row_number][col_number] - 1
 
             # cell constraint gets placed in the corresponding column for the cell number 1-81
             cell_i = cell_number
-            row[cell_i] = Node(1, i, cell_i)
+            row[cell_i] = Node(i, cell_i)
 
             # row constraint gets placed in 9 by 9 diagonals that are offset by 9 times the row number (0 through 8)
             # the whole row constraint grid is offset by 81
-            row_i = ((row_number * 9) + (i % 9)) + 81
-            row[row_i] = Node(1, i, row_i)
+            ROW_CONSTRAINT_OFFSET = 1 * CELL_COUNT
+            row_i = ((row_number * DIGITS) + (i % DIGITS)) + ROW_CONSTRAINT_OFFSET
+            row[row_i] = Node(i, row_i)
          
             # col constraint gets placed in 81 by 81 diagonals that repeat without an additional offset
             # the whole col constraint grid is offset by 162
-            col_i = (i % 81) + 81 * 2
-            row[col_i] = Node(1, i, col_i)
+            COL_CONSTRAINT_OFFSET = 2 * CELL_COUNT
+            col_i = (i % (ROW_SIZE * DIGITS)) + COL_CONSTRAINT_OFFSET
+            row[col_i] = Node(i, col_i)
           
             # box constraint gets placed in 9 by 9 diagonals that are offset by 9 times the box number (0 through 8)
             # the box constraint grid is offset by 243
-            box_i = ((box_number * 9) + (i % 9)) + 81 * 3
-            row[box_i] = Node(1, i, box_i)
+            BOX_CONSTRAINT_OFFSET = 3 * CELL_COUNT
+            box_i = ((box_number * BOX_COL_SIZE * BOX_ROW_SIZE) + (i % DIGITS)) + BOX_CONSTRAINT_OFFSET
+            row[box_i] = Node(i, box_i)
 
 
 #Tomfoolery below this line... beware!
 #-----------------------------------------------------------------
+sudoku = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
+          [6, 0, 0, 1, 9, 5, 0, 0, 0],
+          [0, 9, 8, 0, 0, 0, 0, 6, 0],
+          [8, 0, 0, 0, 6, 0, 0, 0, 3],
+          [4, 0, 0, 8, 0, 3, 0, 0, 1],
+          [7, 0, 0, 0, 2, 0, 0, 0, 6],
+          [0, 6, 0, 0, 0, 0, 2, 8, 0],
+          [0, 0, 0, 4, 1, 9, 0, 0, 5],
+          [0, 0, 0, 0, 8, 0, 0, 7, 9]]
 
-
-cover = Cover()
+cover = Cover(sudoku)
 
 # create header column
-head_col = Column(Node('h', -1, -1))
+head_col = Column(Node(-1, -1))
 for i in range(81 * 9):
-    head_col.add(Node(i, i, -1))
+    head_col.add(Node(i, -1))
 
 # create header row
 col_list = ColumnList(head_col)
 for i in range(81 * 4):
-    new_col = Column(Node(i, -1, i))
+    new_col = Column(Node(-1, i))
     for j, row in enumerate(cover.matrix):
         if type(row[i]) is Node:
             new_col.add(row[i])
@@ -175,4 +200,6 @@ while current_row != 729:
 
     current_row += 1
 
-print(col_list.head_col.left.head)
+for i, row in enumerate(cover.matrix):
+    if i < 9:
+        print(row)
