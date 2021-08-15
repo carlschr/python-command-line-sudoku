@@ -92,6 +92,11 @@ class ColumnList:
         
         return string
 
+class LinkedGrid:
+    def __init__(self, col_list):
+        self.head = col_list.head_col.head
+        self.tail = col_list.tail_col.tail
+
 # Class for a sudoku cover matrix 729 by 324
 # Each row represents a choice (e.g. 4 in cell 9, 5 in cell 80, 9 in cell 32, etc.)
 # Rows follow this order: cell 1 (guesses 1-9), cell 2 (guesses 1-9), etc.
@@ -124,82 +129,88 @@ class Cover:
 
             # cell constraint gets placed in the corresponding column for the cell number 1-81
             cell_i = cell_number
-            row[cell_i] = Node(i, cell_i)
+            row[cell_i] = Node(index, cell_i)
 
             # row constraint gets placed in 9 by 9 diagonals that are offset by 9 times the row number (0 through 8)
             # the whole row constraint grid is offset by 81
             ROW_CONSTRAINT_OFFSET = 1 * CELL_COUNT
             row_i = ((row_number * DIGITS) + (i % DIGITS)) + ROW_CONSTRAINT_OFFSET
-            row[row_i] = Node(i, row_i)
+            row[row_i] = Node(index, row_i)
          
             # col constraint gets placed in 81 by 81 diagonals that repeat without an additional offset
             # the whole col constraint grid is offset by 162
             COL_CONSTRAINT_OFFSET = 2 * CELL_COUNT
             col_i = (i % (ROW_SIZE * DIGITS)) + COL_CONSTRAINT_OFFSET
-            row[col_i] = Node(i, col_i)
+            row[col_i] = Node(index, col_i)
           
             # box constraint gets placed in 9 by 9 diagonals that are offset by 9 times the box number (0 through 8)
             # the box constraint grid is offset by 243
             BOX_CONSTRAINT_OFFSET = 3 * CELL_COUNT
             box_i = ((box_number * BOX_COL_SIZE * BOX_ROW_SIZE) + (i % DIGITS)) + BOX_CONSTRAINT_OFFSET
-            row[box_i] = Node(i, box_i)
+            row[box_i] = Node(index, box_i)
+    
+    def create_linked_grid(self):
+        # create header column
+        head_col = Column(Node(-1, -1))
+        for i in range(CELL_COUNT * DIGITS):
+            head_col.add(Node(i, -1))
 
+        # create header row
+        col_list = ColumnList(head_col)
+        for i in range(CELL_COUNT * CONSTRAINTS):
+            new_col = Column(Node(-1, i))
+            for row in self.matrix:
+                if type(row[i]) is Node:
+                    new_col.add(row[i])
+            col_list.add(new_col)
 
-#Tomfoolery below this line... beware!
+        # list to cycle through columns in parallel started with all column heads
+        parallel_nodes = []
+        current_col = col_list.head_col
+        for i in range(col_list.size):
+            parallel_nodes.append(current_col.head)
+            current_col = current_col.right
+
+        def filter_function(i, el, current_row):
+            # lists traverse only if the current node will be linked in the next chunk of code
+            if el.row == current_row:
+                parallel_nodes[i] = parallel_nodes[i].down
+                return True
+
+        # loops through all rows
+        for j in range(-1, CELL_COUNT * DIGITS + 1):
+            # list of nodes on the current row
+            row_nodes = [node for i, node in enumerate(parallel_nodes) if filter_function(i, node, j)]
+            # links each row's nodes
+            for i, node in enumerate(row_nodes):
+                if i != len(row_nodes) - 1:
+                    node.add_right(row_nodes[i + 1])
+        
+        self.linked_grid = LinkedGrid(col_list)
+        return self.linked_grid
+
 #-----------------------------------------------------------------
-sudoku = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-          [6, 0, 0, 1, 9, 5, 0, 0, 0],
-          [0, 9, 8, 0, 0, 0, 0, 6, 0],
-          [8, 0, 0, 0, 6, 0, 0, 0, 3],
-          [4, 0, 0, 8, 0, 3, 0, 0, 1],
-          [7, 0, 0, 0, 2, 0, 0, 0, 6],
-          [0, 6, 0, 0, 0, 0, 2, 8, 0],
-          [0, 0, 0, 4, 1, 9, 0, 0, 5],
-          [0, 0, 0, 0, 8, 0, 0, 7, 9]]
 
-cover = Cover(sudoku)
+if __name__ == '__main__':
+    sudoku = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]]
 
-# create header column
-head_col = Column(Node(-1, -1))
-for i in range(81 * 9):
-    head_col.add(Node(i, -1))
+    cover = Cover(sudoku)
+    grid = cover.create_linked_grid()
 
-# create header row
-col_list = ColumnList(head_col)
-for i in range(81 * 4):
-    new_col = Column(Node(-1, i))
-    for j, row in enumerate(cover.matrix):
-        if type(row[i]) is Node:
-            new_col.add(row[i])
-    col_list.add(new_col)
+#--------------------------------------------
 
-# list to cycle through columns in parallel started with all column heads
-parallel_nodes = []
-current_col = col_list.head_col
-for i in range(col_list.size):
-    parallel_nodes.append(current_col.head)
-    current_col = current_col.right
+# print statements (too lazy to do real testing? maybe...)
 
-# starts at -1 as headers have -1 as row/col
-current_row = -1
-def filter_function(i, el):
-    # lists traverse only if the current node will be linked in the next chunk of code
-    if el.row == current_row:
-        parallel_nodes[i] = parallel_nodes[i].down
-        return True
+# for i, row in enumerate(cover.matrix):
+#     if i < 9:
+#         print(row)
 
-# loops through all rows
-while current_row != 729:
-    # list of nodes on the current row
-    row_nodes = [node for i, node in enumerate(parallel_nodes) if filter_function(i, node)]
-
-    # links each rows nodes
-    for i, node in enumerate(row_nodes):
-        if i != len(row_nodes) - 1:
-            node.add_right(row_nodes[i + 1])
-
-    current_row += 1
-
-for i, row in enumerate(cover.matrix):
-    if i < 9:
-        print(row)
+# print(cover.linked_grid.tail.right.down)
