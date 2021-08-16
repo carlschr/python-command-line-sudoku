@@ -40,6 +40,14 @@ class Node:
         self.left.right = node
         self.left = node
 
+    def cover(self):
+        self.down.up = self.up
+        self.up.down = self.down
+
+    def uncover(self):
+        self.down.up = self
+        self.up.down = self
+
     def __repr__(self) -> str:
         return f'[{self.row}, {self.col}]'
 
@@ -47,17 +55,27 @@ class Column:
     def __init__(self, header):
         self.head = header
         self.tail = header
+        header.parent = self
         self.right = self
         self.left = self
         self.size = 1
 
     def add(self, node):
+        node.parent = self
         node.up = self.tail
         node.down = self.tail.down
         self.tail.down = node
         self.tail = node
         self.head.up = node
         self.size += 1
+
+    def cover(self):
+        self.right.left = self.left
+        self.left.right = self.right
+
+    def uncover(self):
+        self.right.left = self
+        self.left.right = self
 
     def __repr__(self):
         string = ''
@@ -94,8 +112,56 @@ class ColumnList:
 
 class LinkedGrid:
     def __init__(self, col_list):
-        self.head = col_list.head_col.head
-        self.tail = col_list.tail_col.tail
+        self.head = col_list.head_col
+        self.tail = col_list.tail_col
+    
+    def remove_non_solution_rows(self, solution_node):
+        current_col_node = solution_node.down
+        column = solution_node.parent
+
+        while current_col_node != solution_node:
+            if current_col_node == column.head:
+                current_col_node = current_col_node.down
+                continue
+
+            current_row_node = current_col_node.right
+            while current_row_node != current_col_node:
+                current_row_node.cover()
+                current_row_node = current_row_node.right
+
+            current_col_node = current_col_node.down
+    
+    def reinsert_non_solution_rows(self, solution_node):
+        current_col_node = solution_node.up
+        column = solution_node.parent
+        while current_col_node != solution_node:
+            if current_col_node == column.head:
+                current_col_node = current_col_node.up
+                continue
+
+            current_row_node = current_col_node.left
+            while current_col_node != current_row_node:
+                current_row_node.uncover()
+                current_row_node = current_row_node.left
+
+            current_col_node = current_col_node.up
+    
+    def remove_solution_cols(self, solution_node):
+        solution_node.parent.cover()
+        solution_node.left.cover()
+        right_node = solution_node.right
+        while right_node != solution_node.left:
+            right_node.parent.cover()
+            right_node = right_node.right
+
+    def reinsert_solution_cols(self, solution_node):
+        left_node = solution_node.left.left
+        while left_node != solution_node:
+            left_node.parent.uncover()
+            left_node = left_node.left
+        solution_node.left.uncover()
+        solution_node.parent.uncover()
+
 
 # Class for a sudoku cover matrix 729 by 324
 # Each row represents a choice (e.g. 4 in cell 9, 5 in cell 80, 9 in cell 32, etc.)
@@ -189,21 +255,60 @@ class Cover:
         self.linked_grid = LinkedGrid(col_list)
         return self.linked_grid
 
+    def solve(self, depth=0, solution=[]):
+        print(depth)
+        ll = self.linked_grid
+        h = ll.head
+        if depth == CELL_COUNT:
+            return solution
+        column = h.right
+
+        if column == h:
+            print(solution)
+            return None
+
+        column.cover()
+        
+        current_row = column.head.down
+
+        while current_row != column.head:
+            solution.append(current_row.row)
+            ll.remove_solution_cols(current_row)
+            ll.remove_non_solution_rows(current_row)
+
+            complete_solution = self.solve(depth + 1, solution)
+            if complete_solution:
+                return complete_solution
+            
+            ll.reinsert_non_solution_rows(current_row)
+            ll.reinsert_solution_cols(current_row)
+            solution.pop()
+
+            current_row = current_row.down
+        
+        column.uncover()
+        return None
+
+
+
+
 #-----------------------------------------------------------------
 
 if __name__ == '__main__':
     sudoku = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-            [6, 0, 0, 1, 9, 5, 0, 0, 0],
-            [0, 9, 8, 0, 0, 0, 0, 6, 0],
-            [8, 0, 0, 0, 6, 0, 0, 0, 3],
-            [4, 0, 0, 8, 0, 3, 0, 0, 1],
-            [7, 0, 0, 0, 2, 0, 0, 0, 6],
-            [0, 6, 0, 0, 0, 0, 2, 8, 0],
-            [0, 0, 0, 4, 1, 9, 0, 0, 5],
-            [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+              [6, 0, 0, 1, 9, 5, 0, 0, 0],
+              [0, 9, 8, 0, 0, 0, 0, 6, 0],
+              [8, 0, 0, 0, 6, 0, 0, 0, 3],
+              [4, 0, 0, 8, 0, 3, 0, 0, 1],
+              [7, 0, 0, 0, 2, 0, 0, 0, 6],
+              [0, 6, 0, 0, 0, 0, 2, 8, 0],
+              [0, 0, 0, 4, 1, 9, 0, 0, 5],
+              [0, 0, 0, 0, 8, 0, 0, 7, 9]]
 
     cover = Cover(sudoku)
     grid = cover.create_linked_grid()
+    solution = cover.solve()
+    print('\n', len(solution), '\n\n', solution)
 
 #--------------------------------------------
 
