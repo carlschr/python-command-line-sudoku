@@ -9,6 +9,12 @@ class Column:
         self.left = self
         self.size = 1
 
+    def add_right(self, column):
+        column.right = self.right
+        column.left = self
+        self.right.left = column
+        self.right = column
+
     def add(self, node):
         node.parent = self
         node.up = self.tail
