@@ -15,4 +15,4 @@ class Sudoku:
 
 if __name__ == '__main__':
     test_sudoku = Sudoku('530070000600195000098000060800060003400803001700020006060000280000419005000080079')
-    print(test_sudoku)
+    print(f'Test Sudoku: {test_sudoku}')

@@ -41,3 +41,8 @@ class Node:
 
     def __repr__(self) -> str:
         return f'[{self.row}, {self.col}]'
+
+
+if __name__ == '__main__':
+    test_node = Node(1, 5)
+    print(f'Test Node: {test_node}')

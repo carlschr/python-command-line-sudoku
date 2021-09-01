@@ -1,3 +1,5 @@
+from Node import Node
+
 class Column:
     def __init__(self, header):
         self.head = header
@@ -31,3 +33,12 @@ class Column:
             string += str(current_node)
             current_node = current_node.down
         return string
+
+if __name__ == '__main__':
+    test_head = Node(0, 0)
+    test_column = Column(test_head)
+    for i in range(1, 9):
+        new_node = Node(i, 0)
+        test_column.add(new_node)
+    print(f'Test Column: {test_column}')
+    print(f'Test Column Head: {test_column.head}')
