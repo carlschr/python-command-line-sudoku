@@ -7,7 +7,7 @@ class Sudoku:
             col = i % 9
             self.grid[row][col] = int(char)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         r = ''
         for row in self.grid:
             r += f'\n{row}'

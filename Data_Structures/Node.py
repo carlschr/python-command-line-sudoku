@@ -7,12 +7,6 @@ class Node:
         self.right = self
         self.left = self
 
-    def add_below(self, node):
-        node.down = self.down
-        node.up = self
-        self.down.up = node
-        self.down = node
-
     def add_right(self, node):
         node.right = self.right
         node.left = self

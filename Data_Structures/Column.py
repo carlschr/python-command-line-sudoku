@@ -43,7 +43,7 @@ class ColumnNode(Node):
             current = current.up
         self.reinsertRL()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         string = ''
         current_node = self.down
         for _ in range(self.size - 1):
