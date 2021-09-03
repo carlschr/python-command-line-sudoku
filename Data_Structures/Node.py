@@ -6,12 +6,6 @@ class Node:
         self.down = self
         self.right = self
         self.left = self
-    
-    def add_above(self, node):
-        node.up = self.up
-        node.down = self
-        self.up.down = node
-        self.up = node
 
     def add_below(self, node):
         node.down = self.down
@@ -25,17 +19,11 @@ class Node:
         self.right.left = node
         self.right = node
 
-    def add_left(self, node):
-        node.left = self.left
-        node.right = self
-        self.left.right = node
-        self.left = node
-
-    def cover(self):
+    def removeUD(self):
         self.down.up = self.up
         self.up.down = self.down
 
-    def uncover(self):
+    def reinsertUD(self):
         self.down.up = self
         self.up.down = self
 

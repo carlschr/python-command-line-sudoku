@@ -1,7 +1,7 @@
 from Node import Node
 from Sudoku import Sudoku
-from Column import Column
-# import matplotlib.pyplot as plt
+from Column import ColumnNode
+import matplotlib.pyplot as plt
 
 class DLX:
     def __init__(self, sudoku_string):
@@ -18,13 +18,12 @@ class DLX:
         self.matrix = [[0 for _ in range(CELL_COUNT * CONSTRAINTS)] for _ in range(CELL_COUNT * DIGITS)]
 
         # creates columns and connects them
-        self.columns = [Column(Node(-1, i)) for i in range(-1, CELL_COUNT * CONSTRAINTS)]
+        self.columns = [ColumnNode(-1, i) for i in range(-1, CELL_COUNT * CONSTRAINTS)]
         for i in range(len(self.columns) - 1):
             self.columns[i].add_right(self.columns[i + 1])
-            self.columns[i].head.add_right(self.columns[i + 1].head)
 
         # sets head node for matrix
-        self.head_node = self.columns[0].head
+        self.header = self.columns[0]
 
         # loops through rows to assign constraints
         for index, row in enumerate(self.matrix):
@@ -69,7 +68,7 @@ class DLX:
             # box constraint gets placed in 9 by 9 diagonals that are offset by 9 times the box number (0 through 8)
             # the box constraint grid is offset by 243
             BOX_CONSTRAINT_OFFSET = 3 * CELL_COUNT
-            box_i = ((box_number * BOX_COL_SIZE * BOX_ROW_SIZE) + (i % DIGITS)) + BOX_CONSTRAINT_OFFSET
+            box_i = ((box_number * DIGITS) + (i % DIGITS)) + BOX_CONSTRAINT_OFFSET
             box_node = Node(index, box_i)
             row[box_i] = box_node
 
@@ -85,23 +84,16 @@ class DLX:
             self.columns[col_i + COLS_INDEX_OFFSET].add(col_node)
             self.columns[box_i + COLS_INDEX_OFFSET].add(box_node)
 
-    def remove_row(self, row_node):
-        row_node.cover()
-        current = row_node.right
-        while current != row_node:
-            current.cover()
-            current = current.right
-
     def solve(self, depth=0):
         # print(self.solution)
         # self.print_cols()
-        if self.head_node.parent.right.head == self.head_node:
+        if self.header.right == self.header:
             return True
         col = self.find_col()
         col.cover()
-        current_sol = col.head.down
-        while current_sol != col.head:
-            self.solution.append(current_sol.row)
+        current_sol = col.down
+        while current_sol != col:
+            self.solution.append(current_sol)
             sol_node = current_sol.right
             while sol_node != current_sol:
                 sol_node.parent.cover()
@@ -110,20 +102,22 @@ class DLX:
             if self.solve(depth + 1):
                 return True
 
+            current_sol = self.solution.pop()
+            col = current_sol.parent
+
             sol_node = current_sol.left
             while sol_node != current_sol:
                 sol_node.parent.uncover()
                 sol_node = sol_node.left
             
-            self.solution.pop()
             current_sol = current_sol.down
-        
+
         col.uncover()
         
     def find_col(self):
-        min_col = self.head_node.parent.right
-        current = self.head_node.parent.right.right
-        while current.head != self.head_node:
+        min_col = self.header.right
+        current = self.header.right.right
+        while current != self.header:
             if current.size < min_col.size:
                 min_col = current
             current = current.right
@@ -137,11 +131,11 @@ class DLX:
                 current =  self.matrix[i][j]
                 if current != 0:
                     row += str(current)
-            r += f'\n{row}'
+            r += f'\n{row if row != "" else "empty"}'
         return r
     
     def print_cols(self):
-        start = self.head_node.parent
+        start = self.header
         print(start)
         current = start.right
         while current != start:
@@ -151,53 +145,53 @@ class DLX:
 if __name__ == '__main__':
     sudoku_string = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
     test_cover = DLX(sudoku_string)
-    # print(f'Test Cover Matrix: {test_cover}')
-    # print(f'\nTest Sudoku: {test_cover.sudoku}')
-    # print(f'\nTest Cover Head: {test_cover.head_node}')
-    # print(f'\nTest Traversal (right): {test_cover.head_node.right}')
-    # print(f'\nTest Traversal (left): {test_cover.head_node.left}')
-    # print(f'\nTest Traversal (up): {test_cover.head_node.up}')
-    # print(f'\nTest Traversal (down): {test_cover.head_node.down}')
+    print(f'Test Cover Matrix: {test_cover}')
+    print(f'\nTest Sudoku: {test_cover.sudoku}')
+    print(f'\nTest Cover Head: {test_cover.header}')
+    print(f'\nTest Traversal (right): {test_cover.header.right}')
+    print(f'\nTest Traversal (left): {test_cover.header.left}')
+    print(f'\nTest Traversal (up): {test_cover.header.up}')
+    print(f'\nTest Traversal (down): {test_cover.header.down}')
 
     test_cover.solve()
     solution = test_cover.solution
     for i, char in enumerate(sudoku_string):
         if char == '0':
-            matrix_row = solution[i]
+            matrix_row = solution[i].row
             sudoku_string = sudoku_string[:i] + str((matrix_row % 9) + 1) + sudoku_string[i + 1:]
-    print(Sudoku(sudoku_string))
+    print(f'\nTest Solution: {Sudoku(sudoku_string)}')
 
-    # x1 = []
-    # y1 = []
-    # x2 = []
-    # y2 = []
-    # x3 = []
-    # y3 = []
-    # x4 = []
-    # y4 = []
-    # for i, _ in enumerate(test_cover.matrix):
-    #     for j, _ in enumerate(test_cover.matrix[0]):
-    #         if test_cover.matrix[i][j] != 0:
-    #             current = test_cover.matrix[i][j]
-    #             if current.col < 81:
-    #                 y1.append(729 - i)
-    #                 x1.append(j)
-    #                 continue
-    #             if current.col < 162:
-    #                 y2.append(729 - i)
-    #                 x2.append(j)
-    #                 continue
-    #             if current.col < 243:
-    #                 y3.append(729 - i)
-    #                 x3.append(j)
-    #                 continue
-    #             y4.append(729 - i)
-    #             x4.append(j)
-    # plt.scatter(x1, y1, marker='.', c='black')
-    # plt.scatter(x2, y2, marker='.', c='blue')
-    # plt.scatter(x3, y3, marker='.', c='green')
-    # plt.scatter(x4, y4, marker='.', c='red')
-    # plt.xlabel('x - axis')
-    # plt.ylabel('y - axis')
-    # plt.title('Cover Matrix')
-    # plt.show()
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+    x3 = []
+    y3 = []
+    x4 = []
+    y4 = []
+    for i, _ in enumerate(test_cover.matrix):
+        for j, _ in enumerate(test_cover.matrix[0]):
+            if test_cover.matrix[i][j] != 0:
+                current = test_cover.matrix[i][j]
+                if current.col < 81:
+                    y1.append(729 - i)
+                    x1.append(j)
+                    continue
+                if current.col < 162:
+                    y2.append(729 - i)
+                    x2.append(j)
+                    continue
+                if current.col < 243:
+                    y3.append(729 - i)
+                    x3.append(j)
+                    continue
+                y4.append(729 - i)
+                x4.append(j)
+    plt.scatter(x1, y1, marker='.', c='black')
+    plt.scatter(x2, y2, marker='.', c='blue')
+    plt.scatter(x3, y3, marker='.', c='green')
+    plt.scatter(x4, y4, marker='.', c='red')
+    plt.xlabel('x - axis')
+    plt.ylabel('y - axis')
+    plt.title('Cover Matrix')
+    plt.show()
