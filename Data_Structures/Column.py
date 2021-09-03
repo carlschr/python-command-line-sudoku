@@ -27,8 +27,24 @@ class Column:
     def cover(self):
         self.right.left = self.left
         self.left.right = self.right
+        current = self.head.down
+        while current != self.head:
+            row_node = current.right
+            while row_node != current:
+                row_node.cover()
+                self.size -= 1
+                row_node = row_node.right
+            current = current.down
 
     def uncover(self):
+        current = self.head.up
+        while current != self.head:
+            row_node = current.left
+            while row_node != current:
+                row_node.uncover()
+                self.size += 1
+                row_node = row_node.left
+            current = current.up
         self.right.left = self
         self.left.right = self
 

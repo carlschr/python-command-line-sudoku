@@ -1,6 +1,7 @@
 from Node import Node
 from Sudoku import Sudoku
 from Column import Column
+# import matplotlib.pyplot as plt
 
 class DLX:
     def __init__(self, sudoku_string):
@@ -71,95 +72,48 @@ class DLX:
             row[box_i] = box_node
 
             # connects row
-            head_node = Node(index, -1)
-            head_node.add_right(cell_node)
             cell_node.add_right(row_node)
             row_node.add_right(col_node)
             col_node.add_right(box_node)
 
             # adds nodes to columns
             COLS_INDEX_OFFSET = 1
-            self.columns[-1 + COLS_INDEX_OFFSET].add(head_node)
             self.columns[cell_i + COLS_INDEX_OFFSET].add(cell_node)
             self.columns[row_i + COLS_INDEX_OFFSET].add(row_node)
             self.columns[col_i + COLS_INDEX_OFFSET].add(col_node)
             self.columns[box_i + COLS_INDEX_OFFSET].add(box_node)
 
-    def solve(self):
+    def solve(self, depth=0):
+        # print(self.solution)
+        # self.print_cols()
         if self.head_node.parent.right.head == self.head_node:
-        # if len(self.solution) == 81:
-            print(self.solution)
             return True
         col = self.find_col()
+        col.cover()
         current_sol = col.head.down
-
         while current_sol != col.head:
             self.solution.append(current_sol.row)
-            current_sol_node = current_sol
-
-            covered = 0
-            uncovered = 0
-
-            for _ in range(5):
-                if current_sol_node.col != -1:
-                    sol_col = current_sol_node.parent
-                    sol_col.cover()
-                    current_col_node = current_sol_node
-
-                    print(f'Covering column {current_sol_node.col}')
-                    for _ in range(sol_col.size):
-                        if current_col_node.row != -1:
-                            current_row_node = current_col_node
-
-                            for _ in range(5):
-                                if current_row_node.col != -1:
-                                    covered += 1
-                                    # print(f'covering: {current_row_node}')
-                                    current_row_node.cover()
-                                current_row_node = current_row_node.right
-                        else:
-                            # print(f'covering: {current_col_node}')
-                            current_col_node.cover()
-                        current_col_node = current_col_node.down
-                current_sol_node = current_sol_node.right
+            sol_node = current_sol.right
+            while sol_node != current_sol:
+                sol_node.parent.cover()
+                sol_node = sol_node.right
             
-            print(f'{covered} body nodes covered.')
+            if self.solve(depth + 1):
+                return True
 
-            # if self.solve():
-            #     return True
-
-            current_sol_node = current_sol
-            for _ in range(5):
-                if current_sol_node.col != -1:
-                    sol_col = current_sol_node.parent
-                    sol_col.uncover()
-                    current_col_node = current_sol_node
-
-                    print(f'Uncovering column {current_sol_node.col}')
-                    for _ in range(sol_col.size):
-                        if current_col_node.row != -1:
-                            current_row_node = current_col_node
-
-                            for _ in range(5):
-                                if current_row_node.col != -1:
-                                    uncovered += 1
-                                    # print(f'uncovering: {current_row_node}')
-                                    current_row_node.uncover()
-                                current_row_node = current_row_node.right
-                        else:
-                            # print(f'uncovering: {current_col_node}')
-                            current_col_node.uncover()
-                        current_col_node = current_col_node.down
-                current_sol_node = current_sol_node.right
-
-            print(f'{uncovered} body nodes uncovered.')
-
+            sol_node = current_sol.left
+            while sol_node != current_sol:
+                sol_node.parent.uncover()
+                sol_node = sol_node.left
+            
             self.solution.pop()
-            current_sol = col.head               
+            current_sol = current_sol.down
+        
+        col.uncover()
         
     def find_col(self):
-        min_col = self.head_node.right.parent
-        current = self.head_node.right.parent.right
+        min_col = self.head_node.parent.right
+        current = self.head_node.parent.right.right
         while current.head != self.head_node:
             if current.size < min_col.size:
                 min_col = current
@@ -176,19 +130,44 @@ class DLX:
                     row += str(current)
             r += f'\n{row}'
         return r
+    
+    def print_cols(self):
+        start = self.head_node.parent
+        print(start)
+        current = start.right
+        while current != start:
+            print(current)
+            current = current.right
 
 if __name__ == '__main__':
     sudoku_string = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
     test_cover = DLX(sudoku_string)
-    print(f'Test Cover Matrix: {test_cover}')
-    print(f'\nTest Sudoku: {test_cover.sudoku}')
-    print(f'\nTest Cover Head: {test_cover.head_node}')
-    print(f'\nTest Traversal (right): {test_cover.head_node.right}')
-    print(f'\nTest Traversal (left): {test_cover.head_node.left}')
-    print(f'\nTest Traversal (up): {test_cover.head_node.up}')
-    print(f'\nTest Traversal (down): {test_cover.head_node.down}')
+    # print(f'Test Cover Matrix: {test_cover}')
+    # print(f'\nTest Sudoku: {test_cover.sudoku}')
+    # print(f'\nTest Cover Head: {test_cover.head_node}')
+    # print(f'\nTest Traversal (right): {test_cover.head_node.right}')
+    # print(f'\nTest Traversal (left): {test_cover.head_node.left}')
+    # print(f'\nTest Traversal (up): {test_cover.head_node.up}')
+    # print(f'\nTest Traversal (down): {test_cover.head_node.down}')
 
-    test_cover.solve()
-    # print(f'First Col Covered?: {test_cover.columns[254].head.col} connected to {test_cover.columns[254].right.head.col}')
+    # test_cover.solve()
+    # solution = test_cover.solution
+    # for i, char in enumerate(sudoku_string):
+    #     if char == '0':
+    #         matrix_row = solution[i]
+    #         sudoku_string = sudoku_string[:i] + str((matrix_row % 9) + 1) + sudoku_string[i + 1:]
+    # sudoku = Sudoku(sudoku_string)
+    # print(sudoku)
 
-    # Issue: only covers first column and skips last f the row
+    # x = []
+    # y = []
+    # for i, _ in enumerate(test_cover.matrix):
+    #     for j, _ in enumerate(test_cover.matrix[0]):
+    #         if test_cover.matrix[i][j] != 0:
+    #             y.append(729 - i)
+    #             x.append(j)
+    # plt.plot(x, y, '.')
+    # plt.xlabel('x - axis')
+    # plt.ylabel('y - axis')
+    # plt.title('Cover Matrix')
+    # plt.show()
