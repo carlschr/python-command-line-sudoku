@@ -40,10 +40,12 @@ class DLX:
             # result is one of nine boxes (0 through 8)
             box_number = int(row_number - (row_number % BOX_COL_SIZE) + col_number//BOX_ROW_SIZE)
 
-            # if the sudoku cell is given, the 9 rows for the cell will all be the same
+            # if the sudoku cell is given, only one option will be created
             # this ensures that the given cells will be part of the solution
             if self.sudoku.grid[row_number][col_number] != 0:
                 i = (cell_number * DIGITS) + self.sudoku.grid[row_number][col_number] - 1
+                if i != index:
+                    continue
 
             # cell constraint gets placed in the corresponding column for the cell number 1-81
             cell_i = cell_number
@@ -82,6 +84,13 @@ class DLX:
             self.columns[row_i + COLS_INDEX_OFFSET].add(row_node)
             self.columns[col_i + COLS_INDEX_OFFSET].add(col_node)
             self.columns[box_i + COLS_INDEX_OFFSET].add(box_node)
+
+    def remove_row(self, row_node):
+        row_node.cover()
+        current = row_node.right
+        while current != row_node:
+            current.cover()
+            current = current.right
 
     def solve(self, depth=0):
         # print(self.solution)
@@ -150,23 +159,44 @@ if __name__ == '__main__':
     # print(f'\nTest Traversal (up): {test_cover.head_node.up}')
     # print(f'\nTest Traversal (down): {test_cover.head_node.down}')
 
-    # test_cover.solve()
-    # solution = test_cover.solution
-    # for i, char in enumerate(sudoku_string):
-    #     if char == '0':
-    #         matrix_row = solution[i]
-    #         sudoku_string = sudoku_string[:i] + str((matrix_row % 9) + 1) + sudoku_string[i + 1:]
-    # sudoku = Sudoku(sudoku_string)
-    # print(sudoku)
+    test_cover.solve()
+    solution = test_cover.solution
+    for i, char in enumerate(sudoku_string):
+        if char == '0':
+            matrix_row = solution[i]
+            sudoku_string = sudoku_string[:i] + str((matrix_row % 9) + 1) + sudoku_string[i + 1:]
+    print(Sudoku(sudoku_string))
 
-    # x = []
-    # y = []
+    # x1 = []
+    # y1 = []
+    # x2 = []
+    # y2 = []
+    # x3 = []
+    # y3 = []
+    # x4 = []
+    # y4 = []
     # for i, _ in enumerate(test_cover.matrix):
     #     for j, _ in enumerate(test_cover.matrix[0]):
     #         if test_cover.matrix[i][j] != 0:
-    #             y.append(729 - i)
-    #             x.append(j)
-    # plt.plot(x, y, '.')
+    #             current = test_cover.matrix[i][j]
+    #             if current.col < 81:
+    #                 y1.append(729 - i)
+    #                 x1.append(j)
+    #                 continue
+    #             if current.col < 162:
+    #                 y2.append(729 - i)
+    #                 x2.append(j)
+    #                 continue
+    #             if current.col < 243:
+    #                 y3.append(729 - i)
+    #                 x3.append(j)
+    #                 continue
+    #             y4.append(729 - i)
+    #             x4.append(j)
+    # plt.scatter(x1, y1, marker='.', c='black')
+    # plt.scatter(x2, y2, marker='.', c='blue')
+    # plt.scatter(x3, y3, marker='.', c='green')
+    # plt.scatter(x4, y4, marker='.', c='red')
     # plt.xlabel('x - axis')
     # plt.ylabel('y - axis')
     # plt.title('Cover Matrix')
