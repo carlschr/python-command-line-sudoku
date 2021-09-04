@@ -22,6 +22,7 @@ class ColumnNode(Node):
         self.left.right = self
 
     def cover(self):
+        # print(f'covering column: {self.col}')
         self.removeRL()
         current = self.down
         while current != self:
@@ -33,6 +34,7 @@ class ColumnNode(Node):
             current = current.down
 
     def uncover(self):
+        # print(f'uncovering column: {self.col}')
         current = self.up
         while current != self:
             row_node = current.left

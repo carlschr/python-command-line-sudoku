@@ -3,8 +3,8 @@ class Sudoku:
         self.size = int(len(sudoku_string) ** .5)
         self.grid = [[0 for _ in range(self.size)] for _ in range(self.size)]
         for i, char in enumerate(sudoku_string):
-            row = int(i//9)
-            col = i % 9
+            row = int(i//self.size)
+            col = i % self.size
             self.grid[row][col] = int(char)
     
     def __repr__(self) -> str:

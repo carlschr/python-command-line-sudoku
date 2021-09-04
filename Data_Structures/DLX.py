@@ -87,8 +87,9 @@ class DLX:
     def solve(self, depth=0):
         # print(self.solution)
         # self.print_cols()
-        if self.header.right == self.header:
-            return True
+        if self.header.right == self.header or depth == self.sudoku.size ** 2:
+            self.solved = [n for n in self.solution]
+            # print(self.solution)
         col = self.find_col()
         col.cover()
         current_sol = col.down
@@ -99,8 +100,7 @@ class DLX:
                 sol_node.parent.cover()
                 sol_node = sol_node.right
             
-            if self.solve(depth + 1):
-                return True
+            self.solve(depth + 1)
 
             current_sol = self.solution.pop()
             col = current_sol.parent
@@ -145,7 +145,7 @@ class DLX:
 if __name__ == '__main__':
     sudoku_string = '530070000600195000098000060800060003400803001700020006060000280000419005000080079'
     test_cover = DLX(sudoku_string)
-    print(f'Test Cover Matrix: {test_cover}')
+    # print(f'Test Cover Matrix: {test_cover}')
     print(f'\nTest Sudoku: {test_cover.sudoku}')
     print(f'\nTest Cover Head: {test_cover.header}')
     print(f'\nTest Traversal (right): {test_cover.header.right}')
@@ -154,11 +154,11 @@ if __name__ == '__main__':
     print(f'\nTest Traversal (down): {test_cover.header.down}')
 
     test_cover.solve()
-    solution = test_cover.solution
-    for i, char in enumerate(sudoku_string):
-        if char == '0':
-            matrix_row = solution[i].row
-            sudoku_string = sudoku_string[:i] + str((matrix_row % 9) + 1) + sudoku_string[i + 1:]
+    solution = test_cover.solved
+    for i, node in enumerate(solution):
+        matrix_row = node.row
+        cell = matrix_row//9
+        sudoku_string = sudoku_string[:cell] + str((matrix_row % 9) + 1) + sudoku_string[cell + 1:]
     print(f'\nTest Solution: {Sudoku(sudoku_string)}')
 
     x1 = []
