@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 class DLX:
     def __init__(self, sudoku_string):
         self.solution = []
+        self.multiple_solutions = None
 
         # creates sudoku and defines constants
         self.sudoku = Sudoku(sudoku_string)
@@ -88,6 +89,9 @@ class DLX:
         # print(self.solution)
         # self.print_cols()
         if self.header.right == self.header or depth == self.sudoku.size ** 2:
+            self.multiple_solutions = False if self.multiple_solutions == None else True
+            if self.multiple_solutions:
+                return
             self.solved = [n for n in self.solution]
             # print(self.solution)
         col = self.find_col()
@@ -101,6 +105,9 @@ class DLX:
                 sol_node = sol_node.right
             
             self.solve(depth + 1)
+
+            if self.multiple_solutions:
+                return
 
             current_sol = self.solution.pop()
             col = current_sol.parent
@@ -155,11 +162,14 @@ if __name__ == '__main__':
 
     test_cover.solve()
     solution = test_cover.solved
-    for i, node in enumerate(solution):
-        matrix_row = node.row
-        cell = matrix_row//9
-        sudoku_string = sudoku_string[:cell] + str((matrix_row % 9) + 1) + sudoku_string[cell + 1:]
-    print(f'\nTest Solution: {Sudoku(sudoku_string)}')
+    if not test_cover.multiple_solutions:
+        for i, node in enumerate(solution):
+            matrix_row = node.row
+            cell = matrix_row//9
+            sudoku_string = sudoku_string[:cell] + str((matrix_row % 9) + 1) + sudoku_string[cell + 1:]
+        print(f'\nTest Solution: {Sudoku(sudoku_string)}')
+    else:
+        print('\nSudoku is unsolvable due to multiple solutions.')
 
     x1 = []
     y1 = []
