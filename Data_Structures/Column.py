@@ -1,4 +1,7 @@
-from .Node import Node
+if __name__ == '__main__':
+    from Node import Node
+else:
+    from .Node import Node
 
 class ColumnNode(Node):
     def __init__(self, row, col):

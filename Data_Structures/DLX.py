@@ -1,6 +1,11 @@
-from .Node import Node
-from .Sudoku import Sudoku
-from .Column import ColumnNode
+if __name__ == '__main__':
+    from Node import Node
+    from Sudoku import Sudoku
+    from Column import ColumnNode
+else:
+    from .Node import Node
+    from .Sudoku import Sudoku
+    from .Column import ColumnNode
 import matplotlib.pyplot as plt
 
 class DLX:
