@@ -1,6 +1,6 @@
-from Node import Node
-from Sudoku import Sudoku
-from Column import ColumnNode
+from .Node import Node
+from .Sudoku import Sudoku
+from .Column import ColumnNode
 import matplotlib.pyplot as plt
 
 class DLX:
@@ -89,6 +89,7 @@ class DLX:
         # print(self.solution)
         # self.print_cols()
         if self.header.right == self.header or depth == self.sudoku.size ** 2:
+            self.at_least_one_solution = True
             self.multiple_solutions = False if self.multiple_solutions == None else True
             if self.multiple_solutions:
                 return

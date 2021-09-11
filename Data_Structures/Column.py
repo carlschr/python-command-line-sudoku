@@ -1,4 +1,4 @@
-from Node import Node
+from .Node import Node
 
 class ColumnNode(Node):
     def __init__(self, row, col):
