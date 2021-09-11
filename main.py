@@ -191,6 +191,7 @@ def play():
             print('Oops, That wasn\'t right!')
 
     # kills program if playing is set to False
+    print('Thanks for playing!')
     sys.exit()
 
 # program start
